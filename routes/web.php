@@ -1,7 +1,9 @@
 <?php
 
-use App\Http\Controllers\API\MidtransController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\API\MidtransController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,15 +15,22 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
+// Home Page
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('dashboard');
 });
 
+// Dashboard
+Route::prefix('dashboard')
+    ->middleware(['auth:sanctum', 'admin'])
+    ->group(function () {
+        Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+        Route::resource('food', FoodController::class);
+        Route::resource('users', UserController::class);
 
-Route::middleware(['auth:sanctum', 'verified'])->get('/dashboard', function () {
-    return view('dashboard');
-})->name('dashboard');
+        Route::get('transactions/{id}/status/{status}', [TransactionController::class, 'changeStatus'])->name('transactions.changeStatus');
+        Route::resource('transactions', TransactionController::class);
+    });
 
 
 // Midtrans related
