@@ -14,7 +14,7 @@ class TransactionController extends Controller
      */
     public function index()
     {
-        $transaction = Transaction::with(['food, user'])->paginate(10);
+        $transaction = Transaction::with(['food', 'user'])->paginate(10);
         return view('transactions.index', [
             'transactions' => $transaction
         ]);
@@ -47,9 +47,11 @@ class TransactionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Transaction $transaction)
     {
-        //
+        return view('transactions.detail', [
+            'item' => $transaction
+        ]);
     }
 
     /**
@@ -81,8 +83,20 @@ class TransactionController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Transaction $transaction)
     {
-        //
+        $transaction->delete();
+
+        return redirect()->route('transactions.index');
+    }
+
+    public function changeStatus(Request $request, $id, $status)
+    {
+        $transaction = Transaction::findOrFail($id);
+
+        $transaction->status = $status;
+        $transaction->save();
+
+        return redirect()->route('transactions.show', $id);
     }
 }
